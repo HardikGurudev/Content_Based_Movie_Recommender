@@ -2,6 +2,35 @@ import pickle
 import streamlit as st
 import requests
 
+st.markdown("""
+    <style>
+    .main {
+        background-color: #f5f5f5;
+    }
+    .stButton>button {
+        background-color: #ff4b4b;
+        color: white;
+        border: none;
+        padding: 0.5em 1.5em;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: all 0.3s ease-in-out;
+    }
+    .stButton>button:hover {
+        background-color: #ff2e2e;
+    }
+    .stSelectbox>div>div>div {
+        font-size: 16px;
+    }
+    .movie-title {
+        font-weight: bold;
+        font-size: 16px;
+        margin-top: 10px;
+        text-align: center;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 def fetch_poster(movie_id):
     url = "https://api.themoviedb.org/3/movie/{}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US".format(movie_id)
     data = requests.get(url)
@@ -16,45 +45,24 @@ def recommend(movie):
     recommended_movie_names = []
     recommended_movie_posters = []
     for i in distances[1:6]:
-        # fetch the movie poster
         movie_id = movies.iloc[i[0]].movie_id
         recommended_movie_posters.append(fetch_poster(movie_id))
         recommended_movie_names.append(movies.iloc[i[0]].title)
+    return recommended_movie_names, recommended_movie_posters
 
-    return recommended_movie_names,recommended_movie_posters
+st.markdown("<h1 style='text-align: center; color: #333;'>🎬 Movie Recommender System</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #666;'>Get similar movie suggestions based on your favorites!</p>", unsafe_allow_html=True)
 
-
-st.header('Movie Recommender System')
-movies = pickle.load(open('model/movie_list.pkl','rb'))
-similarity = pickle.load(open('model/similarity.pkl','rb'))
+movies = pickle.load(open('model/movie_list.pkl', 'rb'))
+similarity = pickle.load(open('model/similarity.pkl', 'rb'))
 
 movie_list = movies['title'].values
-selected_movie = st.selectbox(
-    "Type or select a movie from the dropdown",
-    movie_list
-)
+selected_movie = st.selectbox("🎥 Type or select a movie", movie_list)
 
 if st.button('Show Recommendation'):
-    recommended_movie_names,recommended_movie_posters = recommend(selected_movie)
-    col1, col2, col3, col4, col5 = st.beta_columns(5)
-    with col1:
-        st.text(recommended_movie_names[0])
-        st.image(recommended_movie_posters[0])
-    with col2:
-        st.text(recommended_movie_names[1])
-        st.image(recommended_movie_posters[1])
-
-    with col3:
-        st.text(recommended_movie_names[2])
-        st.image(recommended_movie_posters[2])
-    with col4:
-        st.text(recommended_movie_names[3])
-        st.image(recommended_movie_posters[3])
-    with col5:
-        st.text(recommended_movie_names[4])
-        st.image(recommended_movie_posters[4])
-
-
-
-
-
+    recommended_movie_names, recommended_movie_posters = recommend(selected_movie)
+    cols = st.columns(5)
+    for i in range(5):
+        with cols[i]:
+            st.image(recommended_movie_posters[i], use_column_width='always')
+            st.markdown(f"<div class='movie-title'>{recommended_movie_names[i]}</div>", unsafe_allow_html=True)
