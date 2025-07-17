@@ -1,2 +1,2 @@
-# movie-recommender-system-tmdb-dataset
-A content based movie recommender system using cosine similarity
+# Content-Based Movie Recommender
+Tools & technologies used: Python, Pandas, scikit-learn, NLTK, Streamlit, TMDB API 
